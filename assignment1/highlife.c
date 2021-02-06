@@ -158,11 +158,15 @@ static inline void HL_initMaster( unsigned int pattern, size_t worldWidth, size_
     }
 }
 
+// swap the pointers of pA and pB.
 static inline void HL_swap( unsigned char **pA, unsigned char **pB)
 {
-  // You write this function - it should swap the pointers of pA and pB.
+    unsigned char *temp = *pA;
+    *pA = *pB;
+    *pB = temp;
 }
- 
+
+// number of alive cells at 3x3 grid (excluding center)
 static inline unsigned int HL_countAliveCells(unsigned char* data, 
 					   size_t x0, 
 					   size_t x1, 
@@ -171,11 +175,9 @@ static inline unsigned int HL_countAliveCells(unsigned char* data,
 					   size_t y1,
 					   size_t y2) 
 {
-  // You write this function - it should return the number of alive cell for data[x1+y1]
-  // There are 8 neighbors - see the assignment description for more details.
-
-  // return place holder to avoid warning
-  return 0;  
+    return (uint)data[x0+y0] + (uint)data[x0+y1] + (uint)data[x0+y2]
+        + (uint)data[x1+y0] + (uint)data[x1+y2]
+        + (uint)data[x2+y0] + (uint)data[x2+y1] + (uint)data[x2+y2];
 }
 
 // Don't Modify this function or your submitty autograding will not work
@@ -201,25 +203,54 @@ static inline void HL_printWorld(size_t iteration)
 /// Serial version of standard byte-per-cell life.
 bool HL_iterateSerial(size_t iterations) 
 {
-  size_t i, y, x;
+    size_t i, y, x;
 
-  for (i = 0; i < iterations; ++i) 
+    for (i = 0; i < iterations; ++i) 
     {
-      for (y = 0; y < g_worldHeight; ++y) 
-	{
-	  // write code to set: y0, y1 and y2
-	  
-	for (x = 0; x < g_worldWidth; ++x) 
-	  {
-	    // write the code here: set x0, x2, call countAliveCells and
-	    // compute if g_resultsData[y1 + x] is 0 or 1
-	  }
-      }
-      // insert function to swap resultData and data arrays
+        for (y = 0; y < g_worldHeight; ++y) 
+	    {
+	        for (x = 0; x < g_worldWidth; ++x) 
+	        {
+                // calculate positions around current square
+                size_t y0 = ((y + g_worldHeight - 1) % g_worldHeight) * g_worldWidth;
+                size_t y1 = y * g_worldWidth;
+                size_t y2 = ((y + 1) % g_worldHeight) * g_worldWidth;
+                size_t x1 = x;
+                size_t x0 = (x1 + g_worldWidth - 1) % g_worldWidth;
+                size_t x2 = (x1 + 1) % g_worldWidth;
 
+                // count alive cells around current square
+                uint count = HL_countAliveCells(g_data, x0, x1, x2, y0, y1, y2);
+                
+                // compute if g_resultsData[y1 + x] is 0 or 1
+                if (g_data[(y * g_worldWidth) + x] == 1) {
+                    if (count == 2 || count == 3)
+                        g_resultData[(y * g_worldWidth) + x] = 1;
+                    else
+                        g_resultData[(y * g_worldWidth) + x] = 0;
+                } else {
+                    if (count == 3 || count == 6)
+                        g_resultData[(y * g_worldWidth) + x] = 1;
+                    else
+                        g_resultData[(y * g_worldWidth) + x] = 0;
+                }
+	        }
+        }
+
+        // swap resultData and data arrays
+        HL_swap(&g_resultData, &g_data);
+
+        // clear g_resultData
+        for (y = 0; y < g_worldHeight; ++y) 
+	    {
+	        for (x = 0; x < g_worldWidth; ++x) 
+	        {
+                g_resultData[(y * g_worldWidth) + x] = 0;
+            }
+        }
     }
   
-  return true;
+    return true;
 }
 
 int main(int argc, char *argv[])
@@ -232,8 +263,8 @@ int main(int argc, char *argv[])
 
     if( argc != 4 )
     {
-	printf("HighLife requires 3 arguments, 1st is pattern number, 2nd the sq size of the world and 3rd is the number of itterations, e.g. ./highlife 0 32 2 \n");
-	exit(-1);
+        printf("HighLife requires 3 arguments, 1st is pattern number, 2nd the sq size of the world and 3rd is the number of itterations, e.g. ./highlife 0 32 2 \n");
+        exit(-1);
     }
 
     pattern = atoi(argv[1]);
@@ -241,8 +272,8 @@ int main(int argc, char *argv[])
     iterations = atoi(argv[3]);
     
     HL_initMaster(pattern, worldSize, worldSize);
-    // printf("AFTER INIT IS............\n");
-    // HL_printWorld(0);
+    printf("AFTER INIT IS............\n");
+    HL_printWorld(0);
     
     HL_iterateSerial( iterations );
     
