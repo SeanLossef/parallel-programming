@@ -1,0 +1,14 @@
+[PCPAlsss@dcs265 assignment3]$ mpirun -np 1 highlife-exe 5 16384 128 256
+Elapsed Time: 0.649696s
+[PCPAlsss@dcs265 assignment3]$ mpirun -np 2 highlife-exe 5 16384 128 256
+Elapsed Time: 0.373271s
+[PCPAlsss@dcs265 assignment3]$ mpirun -np 3 highlife-exe 5 16384 128 256
+Elapsed Time: 0.251789s
+[PCPAlsss@dcs265 assignment3]$ mpirun -np 4 highlife-exe 5 16384 128 256
+Elapsed Time: 0.198079s
+[PCPAlsss@dcs265 assignment3]$ mpirun -np 5 highlife-exe 5 16384 128 256
+Elapsed Time: 0.162736s
+[PCPAlsss@dcs265 assignment3]$ mpirun -np 6 highlife-exe 5 16384 128 256
+Elapsed Time: 0.140133s
+[PCPAlsss@dcs265 assignment3]$ mpirun -hostfile /tmp/hosts.658032 -np 12 highlife-exe 5 16384 128 256
+Elapsed Time: 0.099794s
